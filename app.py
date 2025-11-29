@@ -73,20 +73,19 @@ class ChatWeb:
 
         self.colors = {
             # 메인 색상
-            'primary': "#FBA1CE",          # 파스텔 핑크
-            'secondary': "#FDADD5",        # 연한 핑크
-            'accent': "#FC72B7",           # 진한 핑크
+            'primary': "#FBA1CE",
+            'secondary': "#FFC9E4",
+            'accent': "#FF6EB6",
             
             # 배경 색상
-            'background': '#FFF5FA',       # 아주 연한 핑크 배경
-            'chat_bg': '#FFFFFF',          # 채팅 배경 (흰색)
-            'sidebar_bg': '#FFE8F5',       # 사이드바 배경
+            'background': '#FFF5FA',       # 배경
+            'chat_bg': '#FFFFFF',          # 채팅 배경
+            'sidebar_bg': "#FFACD5",       # 사이드바 배경
             
             # 텍스트 색상
-            'text_dark': '#4A4A4A',        # 진한 회색
-            'text_light': '#8A8A8A',       # 연한 회색
-            'text_white': '#FFFFFF',       # 흰색
-            # 'text_white': "#C7538D", 
+            'text_dark': '#4A4A4A',
+            'text_light': '#8A8A8A',
+            'text_white': '#FFFFFF',
             
             # 메시지 색상
             'user_msg': '#FFE8F5',         # 사용자 메시지 배경
@@ -109,13 +108,18 @@ class ChatWeb:
             layout="centered",
             initial_sidebar_state="expanded"
         )
-        
+
         # CSS
         st.markdown(f"""
             <style>
             /* 전체 배경색 */
+            [data-testid="stAppViewContainer"],
+            [data-testid="stAppViewContainer"] > .main,
+            .stApp {{
+                background: linear-gradient(135deg, #FFE8F5 0%, #FFF5FA 100%) !important;
+            }}
+
             .main {{
-                background: linear-gradient(135deg, #2D1B2E 0%, #C7538D 100%) !important;
                 max-width: 1200px;
                 margin: 0 auto;
             }}
@@ -127,16 +131,14 @@ class ChatWeb:
                 max-width: 900px;
             }}
             
-            /* 사이드바 스타일 - 폭 넓히기 */
+            /* 사이드바 스타일 */
             [data-testid="stSidebar"] {{
-                background-color: {self.colors['sidebar_bg']};
+                background-color: {self.colors['sidebar_bg']} !important;
                 border-right: 1px solid {self.colors['secondary']};
-                width: 350px !important;
-                min-width: 350px !important;
             }}
-            
+
             [data-testid="stSidebar"] > div:first-child {{
-                width: 350px !important;
+                background-color: {self.colors['sidebar_bg']} !important;
             }}
             
             [data-testid="stSidebar"] .element-container {{
@@ -145,18 +147,19 @@ class ChatWeb:
             
             /* 헤더 스타일 */
             h1 {{
-                color: #FFFFFF;
+                color: #FFACD5 !important;
                 font-weight: 600;
                 font-size: 2rem;
                 margin-bottom: 0.5rem;
+                margin-right: 20rem;
                 letter-spacing: -0.02em;
                 text-align: center;
             }}
             
             /* 부제목 */
             .subtitle {{
-                color: #E0E0E0;
-                font-size: 0.95rem;
+                color: #FFACD5 !important;
+                font-size: 2rem;
                 font-weight: 400;
                 margin-bottom: 2rem;
                 text-align: center;
@@ -176,6 +179,18 @@ class ChatWeb:
             [data-testid="stChatMessageContent"] {{
                 background-color: transparent;
             }}
+
+            /* 하단 영역 배경색 통일 */
+            [data-testid="stHeader"] {{
+                background-color: transparent !important;
+            }}
+
+            [data-testid="stBottom"],
+            [data-testid="stBottom"] > *,
+            footer,
+            footer > * {{
+                background: linear-gradient(135deg, #FFE8F5 0%, #FFF5FA 100%) !important;
+            }}
             
             /* 입력창 컨테이너 */
             .stChatInputContainer {{
@@ -185,19 +200,25 @@ class ChatWeb:
                 max-width: 100% !important;
             }}
 
+            /* 모든 하단 요소 배경 제거 */
+            section[data-testid="stBottom"],
+            section[data-testid="stBottom"] > *,
+            section[data-testid="stBottom"] * {{
+                background-color: #FFF5FA !important;
+            }}
+
             /* 입력창 래퍼 */
             [data-testid="stChatInput"] {{
                 max-width: 100% !important;
                 margin: 0 auto;
             }}
 
-            /* 입력창 스타일 - 흰색 배경 */
+            /* 입력창 스타일 */
             [data-testid="stChatInput"] > div {{
                 background-color: #FFFFFF !important;
                 border: 2px solid {self.colors['primary']} !important;
                 border-radius: 28px !important;
                 padding: 0 !important;
-                width: 100% !important;
             }}
 
             /* 입력창 내부 */
@@ -216,7 +237,6 @@ class ChatWeb:
             [data-testid="stChatInput"] textarea::placeholder,
             [data-testid="stChatInput"] input::placeholder {{
                 color: #999999 !important;
-                opacity: 1 !important;
             }}
 
             /* Focus 상태 */
@@ -252,7 +272,7 @@ class ChatWeb:
             /* 버튼 스타일 */
             .stButton > button {{
                 background-color: {self.colors['primary']};
-                color: {self.colors['text_white']};
+                color: #FFFFFF !important;
                 border: none;
                 border-radius: 10px;
                 padding: 0.6rem 1.5rem;
@@ -260,31 +280,49 @@ class ChatWeb:
                 transition: all 0.2s ease;
                 width: 100%;
             }}
-            
+
             .stButton > button:hover {{
                 background-color: {self.colors['accent']};
                 box-shadow: 0 4px 12px rgba(255, 158, 206, 0.4);
                 transform: translateY(-2px);
             }}
+
+            .stButton > button,
+            .stButton > button p,
+            .stButton > button span,
+            .stButton button[kind="primary"],
+            .stButton button[kind="secondary"] {{
+                color: #FFFFFF !important;
+            }}
+
+            .stButton > button * {{
+                color: #FFFFFF !important;
+            }}
             
-            /* Expander 스타일 - 배경 진하게 + 글자색 */
+            /* Expander 스타일*/
             .streamlit-expanderHeader {{
-                background-color: rgba(255, 179, 217, 0.25) !important;
+                background-color: rgba(255, 158, 206, 0.4) !important;
                 border-radius: 8px;
-                color: #2D1B2E !important;
+                color: #FFFFFF !important;
                 font-weight: 600 !important;
                 padding: 0.75rem 1rem !important;
                 border: 1.5px solid {self.colors['primary']};
             }}
             
             .streamlit-expanderHeader:hover {{
-                background-color: rgba(255, 179, 217, 0.4) !important;
+                background-color: rgba(255, 179, 217, 0.5) !important;
             }}
-            
+
             /* Expander 펼쳤을 때 */
             details[open] > summary {{
                 background-color: rgba(255, 158, 206, 0.4) !important;
                 border-bottom: 2px solid {self.colors['primary']};
+                border-radius: 8px 8px 0 0;
+            }}
+
+            details:not([open]) > summary {{
+                background-color: rgba(255, 158, 206, 0.4) !important;
+                border-radius: 8px;
             }}
             
             /* Expander 내용 배경 */
@@ -370,20 +408,6 @@ class ChatWeb:
         
         # 사이드바
         with st.sidebar:
-            st.markdown("### 색상 테마")
-            st.markdown(f"""
-                <div style="display: flex; gap: 8px; margin-bottom: 1rem;">
-                    <div style="width: 30px; height: 30px; background-color: {self.colors['primary']}; 
-                         border-radius: 50%; border: 2px solid white;"></div>
-                    <div style="width: 30px; height: 30px; background-color: {self.colors['secondary']}; 
-                         border-radius: 50%; border: 2px solid white;"></div>
-                    <div style="width: 30px; height: 30px; background-color: {self.colors['accent']}; 
-                         border-radius: 50%; border: 2px solid white;"></div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("---")
-            
             # 모델 정보 표기
             with st.expander("모델 정보", expanded=True):
                 st.markdown("""
@@ -400,7 +424,7 @@ class ChatWeb:
                     st.metric("💬 질문 수", user_msg_count)
             
             # 프로젝트 정보
-            with st.expander("프로젝트 정보"):
+            with st.expander("프로젝트 정보", expanded=True):
                 st.markdown("""
                 **과목**: 모바일/웹서비스프로그래밍  
                 **학교**: 경희대학교  
