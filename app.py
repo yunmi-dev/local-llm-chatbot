@@ -24,7 +24,7 @@ class ChatLLM:
         self._model = ChatOllama(model=model_name, temperature=temperature)
         
         # Prompt Template 설정
-        self._template = """주어진 질문에 짧고 간결하게 한글로 답변을 제공해주세요.
+        self._template = """주어진 질문에 한글로 답변을 제공해주세요.
 
 Question: {question}
 
@@ -73,14 +73,15 @@ class ChatWeb:
 
         self.colors = {
             # 메인 색상
-            'primary': "#FBA1CE",
+            'primary': "#EA7DB3",
             'secondary': "#FFC9E4",
             'accent': "#FF6EB6",
+            'aaaccent': "#E16AA6",
             
             # 배경 색상
             'background': '#FFF5FA',       # 배경
             'chat_bg': '#FFFFFF',          # 채팅 배경
-            'sidebar_bg': "#FFACD5",       # 사이드바 배경
+            'sidebar_bg': "#FEC5E2",       # 사이드바 배경
             
             # 텍스트 색상
             'text_dark': '#4A4A4A',
@@ -147,7 +148,7 @@ class ChatWeb:
             
             /* 헤더 스타일 */
             h1 {{
-                color: #FFACD5 !important;
+                color: #E16AA6 !important;
                 font-weight: 600;
                 font-size: 2rem;
                 margin-bottom: 0.5rem;
@@ -158,13 +159,13 @@ class ChatWeb:
             
             /* 부제목 */
             .subtitle {{
-                color: #FFACD5 !important;
+                color: #E16AA6 !important;
                 font-size: 2rem;
                 font-weight: 400;
                 margin-bottom: 2rem;
                 text-align: center;
             }}
-            
+
             /* 채팅 메시지 컨테이너 */
             .stChatMessage {{
                 background-color: {self.colors['chat_bg']};
@@ -247,8 +248,8 @@ class ChatWeb:
 
             /* 전송 버튼 */
             [data-testid="stChatInput"] button {{
-                background-color: {self.colors['primary']} !important;
-                color: #2D1B2E !important;
+                background-color: #E16AA6 !important;
+                color: #FFFFFF !important;
                 border: none !important;
                 border-radius: 50% !important;
                 width: 40px !important;
@@ -315,13 +316,13 @@ class ChatWeb:
 
             /* Expander 펼쳤을 때 */
             details[open] > summary {{
-                background-color: rgba(255, 158, 206, 0.4) !important;
+                background-color: {self.colors['primary']} !important;
                 border-bottom: 2px solid {self.colors['primary']};
                 border-radius: 8px 8px 0 0;
             }}
 
             details:not([open]) > summary {{
-                background-color: rgba(255, 158, 206, 0.4) !important;
+                background-color: {self.colors['primary']} !important;
                 border-radius: 8px;
             }}
             
@@ -408,8 +409,37 @@ class ChatWeb:
         
         # 사이드바
         with st.sidebar:
-            # 모델 정보 표기
-            with st.expander("모델 정보", expanded=True):
+            # 모델 설정
+            with st.expander("모델 설정", expanded=False):
+                temperature = st.slider(
+                    "응답 창의성",
+                    min_value=0.0,
+                    max_value=1.0,
+                    value=0.7,
+                    step=0.1,
+                    help="값이 높을수록 더 창의적인 답변"
+                )
+                if temperature != 0.7:
+                    self._llm._model.temperature = temperature
+            
+            # 대화 내보내기
+            with st.expander("대화 저장", expanded=False):
+                if st.button("대화 내용 다운로드"):
+                    if "messages" in st.session_state and len(st.session_state["messages"]) > 0:
+                        chat_text = ""
+                        for msg in st.session_state["messages"]:
+                            role = "사용자" if msg.role == "user" else "AI"
+                            chat_text += f"{role}: {msg.content}\n\n"
+                        
+                        st.download_button(
+                            label="📥 TXT 다운로드",
+                            data=chat_text,
+                            file_name="chat_history.txt",
+                            mime="text/plain"
+                        )
+            
+            # 모델 정보
+            with st.expander("모델 정보", expanded=False):
                 st.markdown("""
                 **모델**: gemma3:1b  
                 **제공**: Google  
@@ -417,14 +447,8 @@ class ChatWeb:
                 **프레임워크**: LangChain
                 """)
             
-            # 통계
-            if "messages" in st.session_state:
-                user_msg_count = len([m for m in st.session_state["messages"] if m.role == "user"])
-                with st.expander("대화 통계"):
-                    st.metric("💬 질문 수", user_msg_count)
-            
             # 프로젝트 정보
-            with st.expander("프로젝트 정보", expanded=True):
+            with st.expander("프로젝트 정보", expanded=False):
                 st.markdown("""
                 **과목**: 모바일/웹서비스프로그래밍  
                 **학교**: 경희대학교  
@@ -434,7 +458,7 @@ class ChatWeb:
             st.markdown("---")
             
             # 초기화 버튼
-            if st.button("🗑️ 대화 초기화 버튼"):
+            if st.button("대화 초기화"):
                 st.session_state["messages"] = []
                 st.rerun()
         
