@@ -220,6 +220,11 @@ class ChatWeb:
                 border: 2px solid {self.colors['primary']} !important;
                 border-radius: 28px !important;
                 padding: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                width: 100% !important;
+                min-height: 60px !important;
+                height: auto !important;
             }}
 
             /* 입력창 내부 */
@@ -230,8 +235,37 @@ class ChatWeb:
                 font-size: 1.1rem !important;
                 padding: 19px 30px !important;
                 min-height: 60px !important;
+                height: 60px !important;
+                max-height: 200px !important;
                 border: none !important;
                 border-radius: 28px !important;
+                flex: 1 !important;
+                width: 100% !important;
+                line-height: 1.5 !important;
+                resize: vertical !important;
+            }}
+
+            /* 입력창 최외곽 컨테이너 고정 */
+            section[data-testid="stBottom"] {{
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                width: 100% !important;
+                max-width: 100vw !important;
+                background: linear-gradient(135deg, #FFE8F5 0%, #FFF5FA 100%) !important;
+            }}
+
+            /* 입력창 wrapper 너비 고정 */
+            [data-testid="stChatInput"] {{
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 auto !important;
+            }}
+
+            [data-testid="stChatInput"] > div {{
+                width: 100% !important;
+                max-width: none !important;
             }}
 
             /* Placeholder 색상 */
