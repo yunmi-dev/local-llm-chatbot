@@ -223,7 +223,7 @@ class ChatWeb:
                 display: flex !important;
                 align-items: center !important;
                 width: 100% !important;
-                min-height: 60px !important;
+                min-height: 65px !important;
                 height: auto !important;
             }}
 
