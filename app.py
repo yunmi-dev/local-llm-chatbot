@@ -22,23 +22,6 @@ class ChatLLM:
         """
         # Model 초기화
         self._model = ChatOllama(model=model_name, temperature=temperature)
-        
-        # Prompt Template 설정
-        self._template = """주어진 질문에 한글로 답변을 제공해주세요.
-
-Question: {question}
-
-Answer:"""
-        
-        self._prompt = ChatPromptTemplate.from_template(self._template)
-        
-        # Chain 연결 (LCEL - LangChain Expression Language)
-        self._chain = (
-            {'question': RunnablePassthrough()}
-            | self._prompt
-            | self._model
-            | StrOutputParser()
-        )
     
     def invoke(self, user_input: str) -> str:
         """
@@ -51,8 +34,25 @@ Answer:"""
             LLM 응답 텍스트
         """
         try:
-            response = self._chain.invoke(user_input)
-            return response
+            # 대화 기록 가져오기
+            messages = []
+            if "messages" in st.session_state:
+                # 이전 대화를 LangChain 형식으로 변환
+                for msg in st.session_state["messages"]:
+                    messages.append({
+                        "role": msg.role,
+                        "content": msg.content
+                    })
+            
+            # 현재 사용자 입력 추가
+            messages.append({
+                "role": "user",
+                "content": user_input
+            })
+            
+            # LLM 호출 (대화 기록 포함)
+            response = self._model.invoke(messages)
+            return response.content
         except Exception as e:
             return f"오류가 발생했습니다: {str(e)}\n\nOllama 서비스가 실행 중인지 확인해주세요."
 
@@ -174,6 +174,37 @@ class ChatWeb:
                 margin-bottom: 1rem;
                 border: 1px solid rgba(255, 179, 217, 0.15);
                 box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            }}
+
+            /* 채팅 메시지 내부 모든 텍스트 색상 고정 */
+            .stChatMessage p,
+            .stChatMessage span,
+            .stChatMessage strong,
+            .stChatMessage em,
+            .stChatMessage code,
+            .stChatMessage li,
+            .stChatMessage div {{
+                color: {self.colors['text_dark']} !important;
+            }}
+
+            /* 인라인 코드 블록 */
+            .stChatMessage code {{
+                background-color: rgba(234, 125, 179, 0.1) !important;
+                color: {self.colors['text_dark']} !important;
+                padding: 2px 6px !important;
+                border-radius: 4px !important;
+            }}
+
+            /* 코드 블록 */
+            .stChatMessage pre {{
+                background-color: rgba(234, 125, 179, 0.1) !important;
+                border: 1px solid {self.colors['secondary']} !important;
+                border-radius: 8px !important;
+                padding: 12px !important;
+            }}
+
+            .stChatMessage pre code {{
+                color: {self.colors['text_dark']} !important;
             }}
             
             /* 사용자 메시지 */
