@@ -56,6 +56,31 @@ class ChatLLM:
             return response.content
         except Exception as e:
             return f"오류가 발생했습니다: {str(e)}\n\nOllama 서비스가 실행 중인지 확인해주세요."
+    
+    def stream(self, user_input: str):
+        """
+        스트리밍 방식으로 응답 생성
+        """
+        try:
+            messages = []
+            if "messages" in st.session_state:
+                for msg in st.session_state["messages"]:
+                    messages.append({
+                        "role": msg.role,
+                        "content": msg.content
+                    })
+            
+            messages.append({
+                "role": "user",
+                "content": user_input
+            })
+            
+            # 스트리밍 호출
+            for chunk in self._model.stream(messages):
+                yield chunk.content
+                
+        except Exception as e:
+            yield f"오류가 발생했습니다: {str(e)}\n\nOllama 서비스가 실행 중인지 확인해주세요."
 
 
 class ChatWeb:
@@ -540,7 +565,7 @@ class ChatWeb:
         
         # 이전 대화 출력
         self.print_messages()
-        
+                
         # 사용자 입력
         if user_input := st.chat_input("메시지를 입력하세요..."):
             # 사용자 메시지 추가
@@ -549,13 +574,18 @@ class ChatWeb:
                 ChatMessage(role="user", content=user_input)
             )
             
-            # AI 응답 생성
+            # AI 응답 생성 (스트리밍)
             with st.chat_message("assistant"):
-                with st.spinner("생각하는 중..."):
-                    msg_assistant = self._llm.invoke(user_input)
-                st.write(msg_assistant)
+                response_placeholder = st.empty()
+                full_response = ""
+                
+                for chunk in self._llm.stream(user_input):
+                    full_response += chunk
+                    response_placeholder.markdown(full_response + "▌")
+                
+                response_placeholder.markdown(full_response)
                 st.session_state["messages"].append(
-                    ChatMessage(role="assistant", content=msg_assistant)
+                    ChatMessage(role="assistant", content=full_response)
                 )
 
 
