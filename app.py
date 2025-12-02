@@ -14,7 +14,7 @@ from langchain_core.messages import ChatMessage
 class ChatLLM:
     """Ollama LLM을 이용한 챗봇 로직 클래스"""
     
-    def __init__(self, model_name="gemma3:1b", temperature=0.7):
+    def __init__(self, model_name="gemma2:2b", temperature=0.7):
         """
         Args:
             model_name: 사용할 Ollama 모델명
@@ -36,6 +36,7 @@ class ChatLLM:
         try:
             # 대화 기록 가져오기
             messages = []
+
             if "messages" in st.session_state:
                 # 이전 대화를 LangChain 형식으로 변환
                 for msg in st.session_state["messages"]:
@@ -506,7 +507,7 @@ class ChatWeb:
             # 모델 정보
             with st.expander("모델 정보", expanded=False):
                 st.markdown("""
-                **모델**: gemma3:1b  
+                **모델**: gemma2:2b  
                 **제공**: Google  
                 **타입**: 로컬 LLM  
                 **프레임워크**: LangChain
@@ -561,7 +562,7 @@ class ChatWeb:
 def main():
     """메인 실행 함수"""
     # LLM 초기화
-    llm = ChatLLM(model_name="gemma3:1b", temperature=0.7)
+    llm = ChatLLM(model_name="gemma2:2b", temperature=0.7)
     
     # 웹 인터페이스 초기화 및 실행
     web = ChatWeb(
